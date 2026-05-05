@@ -1,0 +1,7 @@
+Create local repository and push to Github:
+git init
+git remote add origin git@github.com:DarioLBRMonteiro/exercicio_251_projeto.git 
+git pull origin main 
+git add .
+git commit -m "Projeto criado"
+git push -u origin main
