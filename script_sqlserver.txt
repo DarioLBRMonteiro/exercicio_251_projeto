@@ -1,0 +1,111 @@
+USE master;
+GO
+
+CREATE DATABASE coursejdbc
+ON PRIMARY 
+( 
+    NAME = coursejdbc_Data,
+    FILENAME = 'C:\Users\dario\BASEDADOS\CURSOJAVA\coursejdbc.mdf',
+    SIZE = 10MB,
+    MAXSIZE = UNLIMITED,
+    FILEGROWTH = 10%
+)
+LOG ON 
+( 
+    NAME = coursejdbc_Log,
+    FILENAME = 'C:\Users\dario\BASEDADOS\CURSOJAVA\coursejdbc_log.ldf',
+    SIZE = 5MB,
+    MAXSIZE = 2GB,
+    FILEGROWTH = 10%
+);
+GO
+USE coursejdbc;
+GO
+CREATE SCHEMA course
+GO
+===========================================
+NO SPRING TOOLS
+
+Clique com o botão direito no projeto > Build Path > Configure Build Path.
+Vá na aba Libraries, clique em Add External JARs... 
+selecione o arquivo mssql-jdbc-13.4.0.jre11.jar baixado.
+
+PARA TESTAR A CONEXAO NO SPRING TOOLS
+
+package application;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class Program {
+	public static void main(String[] args) throws SQLException {
+		//String url = "jdbc:sqlserver://localhost:2866;databaseName=coursejdbc;encrypt=true;trustServerCertificate=true;";
+		String url = "jdbc:sqlserver://DESKTOP-UILKHHR:2866;databaseName=coursejdbc;encrypt=true;trustServerCertificate=true;";
+        Connection con = DriverManager.getConnection(url, "sa", "sql@2019");
+        System.out.println("Conectado: " + con.isValid(1));
+	}
+}
+
+==========================================================
+use coursejdbc
+go
+CREATE TABLE course.department (
+  Id int IDENTITY(1, 1) NOT FOR REPLICATION  NOT NULL,
+  [Name] varchar(60) NULL
+) ON [DEFAULT]
+GO
+ALTER TABLE course.department
+ADD CONSTRAINT pkDepartment PRIMARY KEY CLUSTERED (id)
+GO
+CREATE TABLE course.seller (
+  Id int IDENTITY(1, 1) NOT FOR REPLICATION  NOT NULL,
+  [Name] varchar(60) NOT NULL,
+  Email varchar(100) NOT NULL,
+  BirthDate datetime NOT NULL,
+  BaseSalary decimal(18,2) NOT NULL,
+  DepartmentId int NOT NULL
+) ON [DEFAULT]
+GO
+ALTER TABLE course.seller
+ADD CONSTRAINT pkSeller PRIMARY KEY CLUSTERED (id)
+GO
+ALTER TABLE course.seller
+ADD CONSTRAINT fkSellerDepartament FOREIGN KEY (DepartmentId)
+REFERENCES course.department (Id)
+GO
+
+========================================================
+
+use coursejdbc
+go
+INSERT INTO course.department ([Name]) 
+VALUES ('Computers')
+go
+INSERT INTO course.department ([Name]) 
+VALUES  ('Electronics')
+go
+INSERT INTO course.department ([Name]) 
+VALUES ('Fashion')
+go
+INSERT INTO course.department ([Name]) 
+VALUES ('Books');
+go
+INSERT INTO course.seller ([Name], Email, BirthDate, BaseSalary, DepartmentId) 
+VALUES ('Bob Brown','bob@gmail.com','1998-04-21 00:00:00',1000,1)
+go
+INSERT INTO course.seller ([Name], Email, BirthDate, BaseSalary, DepartmentId) 
+VALUES ('Maria Green','maria@gmail.com','1979-12-31 00:00:00',3500,2)
+go
+INSERT INTO course.seller ([Name], Email, BirthDate, BaseSalary, DepartmentId) 
+VALUES ('Alex Grey','alex@gmail.com','1988-01-15 00:00:00',2200,1)
+go
+INSERT INTO course.seller ([Name], Email, BirthDate, BaseSalary, DepartmentId) 
+VALUES ('Martha Red','martha@gmail.com','1993-11-30 00:00:00',3000,4)
+go
+INSERT INTO course.seller ([Name], Email, BirthDate, BaseSalary, DepartmentId) 
+VALUES ('Donald Blue','donald@gmail.com','2000-01-09 00:00:00',4000,3)
+go
+INSERT INTO course.seller ([Name], Email, BirthDate, BaseSalary, DepartmentId) 
+VALUES ('Alex Pink','bob@gmail.com','1997-03-04 00:00:00',3000,2)
+go
