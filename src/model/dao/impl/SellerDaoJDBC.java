@@ -40,7 +40,9 @@ public class SellerDaoJDBC implements SellerDao {
 			st.setInt(5, obj.getDepartment().getId());
 			
 			int rowsAffected = st.executeUpdate();
-			
+
+			conn.commit();
+						
 			if (rowsAffected > 0) {
 				ResultSet rs = st.getGeneratedKeys();
 				if (rs.next()) {
@@ -54,7 +56,13 @@ public class SellerDaoJDBC implements SellerDao {
 			}
 		}
 		catch(SQLException e) {
-			throw new DbException(e.getMessage());
+			try {
+				conn.rollback();
+				throw new DbException("Transaction rolled back ! Cause by: " + e.getMessage());
+			}
+			catch(SQLException e1) {
+				throw new DbException("Error trying to rollback ! Cause by: " + e1.getMessage());
+			}
 		}
 		finally {
 			DB.closeStatement(st);
@@ -77,10 +85,18 @@ public class SellerDaoJDBC implements SellerDao {
 			st.setInt(5, obj.getDepartment().getId());
 			st.setInt(6, obj.getId());
 			
-			st.executeUpdate();					
+			st.executeUpdate();
+			
+			conn.commit();
 		}
 		catch(SQLException e) {
-			throw new DbException(e.getMessage());
+			try {
+				conn.rollback();
+				throw new DbException("Transaction rolled back ! Cause by: " + e.getMessage());
+			}
+			catch(SQLException e1) {
+				throw new DbException("Error trying to rollback ! Cause by: " + e1.getMessage());
+			}
 		}
 		finally {
 			DB.closeStatement(st);
@@ -97,12 +113,20 @@ public class SellerDaoJDBC implements SellerDao {
 			
 			int rows = st.executeUpdate();
 			
+			conn.commit();
+			
 			if (rows == 0) {
 				throw new DbException("Seller informado não encontrado.");
 			}
 		}
 		catch(SQLException e) {
-			throw new DbException(e.getMessage());
+			try {
+				conn.rollback();
+				throw new DbException("Transaction rolled back ! Cause by: " + e.getMessage());
+			}
+			catch(SQLException e1) {
+				throw new DbException("Error trying to rollback ! Cause by: " + e1.getMessage());
+			}
 		}
 		finally {
 			DB.closeStatement(st);
@@ -125,9 +149,9 @@ public class SellerDaoJDBC implements SellerDao {
 			rs = st.executeQuery();
 			if (rs.next()) {
 				
-				Department dep = instantiateDepartment(rs); 
-										
-				Seller seller = instantiateSeller(rs,dep);
+				Department dep = Instantiate.department(rs);
+				
+				Seller seller = Instantiate.seller(rs,dep);
 				
 				return seller;				
 			}
@@ -162,11 +186,11 @@ public class SellerDaoJDBC implements SellerDao {
 				Department dep = map.get(rs.getInt("DepartmentId"));
 				
 				if (dep == null) {
-					dep = instantiateDepartment(rs);
+					dep = Instantiate.department(rs);
 					map.put(rs.getInt("DepartmentId"), dep);
 				}
 				
-				Seller seller = instantiateSeller(rs, dep);
+				Seller seller = Instantiate.seller(rs, dep);
 				
 				list.add(seller);
 			}
@@ -203,11 +227,11 @@ public class SellerDaoJDBC implements SellerDao {
 				Department dep = map.get(rs.getInt("DepartmentId"));
 				
 				if (dep == null) {
-					dep = instantiateDepartment(rs);
+					dep = Instantiate.department(rs);
 					map.put(rs.getInt("DepartmentId"), dep);
 				}
 				
-				Seller seller = instantiateSeller(rs, dep);
+				Seller seller = Instantiate.seller(rs, dep);
 				
 				list.add(seller);
 			}
@@ -220,23 +244,5 @@ public class SellerDaoJDBC implements SellerDao {
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}		
-	}
-		
-	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
-		Seller seller = new Seller();
-		seller.setId(rs.getInt("Id"));
-		seller.setName(rs.getString("Name"));
-		seller.setEmail(rs.getString("Email"));
-		seller.setBirthDate(rs.getDate("BirthDate"));
-		seller.setBaseSalary(rs.getDouble("BaseSalary"));
-		seller.setDepartment(dep);		
-		return seller;
-	}
-		
-	private Department instantiateDepartment(ResultSet rs) throws SQLException {
-		Department dep = new Department();
-		dep.setId(rs.getInt("DepartmentId"));
-		dep.setName(rs.getString("DepName"));
-		return dep;
-	}
+	}		
 }
